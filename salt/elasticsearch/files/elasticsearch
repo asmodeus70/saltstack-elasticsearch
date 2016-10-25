@@ -1,0 +1,5 @@
+/etc/sysconfig/elasticsearch:
+
+ES_STARTUP_SLEEP_TIME=5
+ES_HEAP_SIZE=2g
+MAX_LOCKED_MEMORY=unlimited

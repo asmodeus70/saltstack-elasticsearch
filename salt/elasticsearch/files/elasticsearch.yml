@@ -1,0 +1,5 @@
+network.host: [_enp0s3_, _local_]
+cluster.name: production
+node.name: ${HOSTNAME}
+discovery.zen.ping.unicast.hosts: ["node01", "node02", "node03"]
+bootstrap.mlockall: true
