@@ -1,0 +1,14 @@
+{% set filebeat = salt['grains.filter_by']({
+    'Windows': {
+        'app_install': 'install-service-filebeat.ps1',
+        'install_dir': 'C:\Program Files\Filebeat'
+        'filebeat_service': 'filebeat',
+        'filebeat_config': 'C:\Program Files\Filebeat\filebeat.yml',
+    },
+    'CentOS': {
+        'app_install': 'filebeat-server',
+        'install_dir': '/etc/filebeat',
+        'filebeat_service': 'filebeat',
+        'filebeat_config': '/etc/filebeat/filebeat.yml',
+    },
+}, merge=salt['pillar.get']('filebeat:lookup')) %}

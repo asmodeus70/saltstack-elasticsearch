@@ -1,0 +1,9 @@
+{% set map = salt['grains.filter_by']({
+    'RedHat': {
+        'sssd_dir': '/etc/sssd',
+        'sssd_service': 'sssd',
+        'sssd_conf': 'sssd.conf',
+        'krb5_dir': '/etc',
+        'krb5_conf': 'krb5.conf',
+    },
+}, merge=salt['pillar.get']('sssd:lookup')) %}

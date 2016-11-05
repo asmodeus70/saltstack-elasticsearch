@@ -30,5 +30,7 @@
         'elastic_out_dir': '/etc/logstash/conf.d',
         'limits_dir': '/etc/security',
         'limits_conf': 'limits.conf',
+        'firewall_dir': '/usr/lib/firewalld/services',
+        'firewall_conf': 'elasticsearch.xml'
     },
 }, merge=salt['pillar.get']('elasticsearch:lookup')) %}

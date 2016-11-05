@@ -10,6 +10,33 @@ java_install:
       - java: salt://elasticsearch/files/jdk-8u102-linux-x64.rpm
 {% endif %}
 
+# This section sets up the firewall rules for Elasticsearch
+
+firewall_config:
+  file.managed:
+    - name: {{ map.firewall_dir }}/{{ map.firewall_conf }}
+    - source: salt://elasticsearch/files/elasticsearch.xml
+
+{% if not salt['file.file_exists']('/usr/lib/firewalld/services/elasticsearch.xml') %}
+firewall_rules:
+   cmd.run: 
+     - name: |
+         /sbin/setsebool -P httpd_can_network_connect 1
+         /bin/firewall-cmd --zone=internal --add-service=elasticsearch --permanent
+         /bin/firewall-cmd --zone=internal --add-service=http --permanent
+         /bin/firewall-cmd --reload
+{% endif %}
+
+# This allows us to make changes to the Elasticsearch ruleset and update them automatically
+
+firewall_reload:
+  cmd.run:
+     - name: |
+         /bin/firewall-cmd --zone=internal --add-service=elasticsearch --permanent
+         /bin/firewall-cmd --reload
+     - onchanges:
+       - file: firewall_config
+
 # Now we create the repository file for Elasticsearch.
 
 repo_config:
@@ -98,6 +125,7 @@ nginx_passwd:
   file.managed:
     - name: {{ map.htpasswd_dir }}/{{ map.htpasswd }}
     - source: salt://elasticsearch/files/htpasswd.users
+    - mode: 644
 
 # And finally we make sure that the service will start on boot and is currently
 # running. If it isn't then it will be started.
@@ -135,7 +163,7 @@ cert_gen:
     - source: salt://elasticsearch/files/openssl.cnf
     - template: jinja
     - context: 
-       elk_ip: {{ salt['network.interfaces']()['enp0s3']['inet'][0]['address'] }}
+       elk_ip: {{ salt['network.interfaces']()['eno16780032']['inet'][0]['address'] }}
 
 # This first line just checks to see if the cert has already been created and if it
 # has then it skips this step.
