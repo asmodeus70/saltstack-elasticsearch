@@ -12,6 +12,8 @@ So you can either modify the init.sls to pull the latest version from the web or
 I should also say that the kibana login details are.....
 
 User: admin
+
+
 Password: letmein
 
 You might want to change those...lol
