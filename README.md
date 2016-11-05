@@ -9,4 +9,11 @@ At the moment this formula relies on a zip file being located in "elasticsearch/
 
 So you can either modify the init.sls to pull the latest version from the web or just download your version of choice and modify the init.sls accordingly.
 
+I should also say that the kibana login details are.....
+
+User: admin
+Password: letmein
+
+You might want to change those...lol
+
 Enjoy.
