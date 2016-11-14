@@ -160,10 +160,15 @@ logstash:
 
 # run setsebool command to allow nginx to work (a side effect of enforcing SElinux).
 
+{% if not salt['file.file_exists']('/etc/sedone') %}
 sesetbool:
   cmd.run:
-    - name: /sbin/setsebool -P httpd_can_network_connect 1
+    - name: |
+        /sbin/setsebool -P httpd_can_network_connect 1
+        /bin/touch /etc/sedone
     - order: last
+{% endif %}
+
 
 # Create a self signed cert usinf the server's IP address as the alternate 
 # signing name.
