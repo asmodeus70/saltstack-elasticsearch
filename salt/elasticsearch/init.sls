@@ -42,6 +42,12 @@ repo_config:
     - name: {{ map.repo_dir }}/{{ map.repo_file }}
     - source: salt://elasticsearch/files/elasticsearch.repo
 
+# Install Java for Elasticsearch to work.
+
+java_install:
+  pkg.installed:
+    - name: java
+
 # Next we check to see if Elasticsearch is installed and again if it's
 # not present then we install it.
 
@@ -151,6 +157,13 @@ logstash:
     - name: {{ map.logstash_app }}
     - require:
       - file: {{ map.repo_dir }}/{{ map.logstash_repo_file }}
+
+# run setsebool command to allow nginx to work (a side effect of enforcing SElinux).
+
+sesetbool:
+  cmd.run:
+    - name: /sbin/setsebool -P httpd_can_network_connect 1
+    - order: last
 
 # Create a self signed cert usinf the server's IP address as the alternate 
 # signing name.
