@@ -1,41 +1,39 @@
 {% from "elasticsearch/map.jinja" import map with context %}
 
-# First we check for the presence of Java and if it's not installed
-# we install it.
-
-{% if not salt['file.file_exists']('/bin/java') %}
-java_install:
-  pkg.installed:
-    - sources:
-      - java: salt://elasticsearch/files/jdk-8u102-linux-x64.rpm
-{% endif %}
-
 # This section sets up the firewall rules for Elasticsearch
+# First we create a new elasticsearch firewall profile.
 
 firewall_config:
   file.managed:
     - name: {{ map.firewall_dir }}/{{ map.firewall_conf }}
     - source: salt://elasticsearch/files/elasticsearch.xml
+    - stateful: True
 
-{% if not salt['file.file_exists']('/usr/lib/firewalld/services/elasticsearch.xml') %}
+# Now we ensure that the firewall is running and enabled.
+
+firewalld:
+  service.running:
+    - name: firewalld
+    - enable: True
+
+# And now we apply the firewall rules for elasticsearch and http.
+
 firewall_rules:
-   cmd.run: 
-     - name: |
-         /sbin/setsebool -P httpd_can_network_connect 1
-         /bin/firewall-cmd --zone=internal --add-service=elasticsearch --permanent
-         /bin/firewall-cmd --zone=internal --add-service=http --permanent
-         /bin/firewall-cmd --reload
-{% endif %}
+  firewalld.present:
+    - name: internal
+    - services:
+      - http
+      - elasticsearch
 
-# This allows us to make changes to the Elasticsearch ruleset and update them automatically
+# This bit watches for changes to the firewall rules and reloads the firewall
+# if it detects changes.
 
-firewall_reload:
-  cmd.run:
-     - name: |
-         /bin/firewall-cmd --zone=internal --add-service=elasticsearch --permanent
-         /bin/firewall-cmd --reload
-     - onchanges:
-       - file: firewall_config
+firewalld_watch:
+  service.running:
+    - name: firewalld
+    - reload: True
+    - watch:
+      - firewalld: internal
 
 # Now we create the repository file for Elasticsearch.
 
@@ -237,4 +235,5 @@ memory_tweak:
   file.managed:
     - name: {{ map.limits_dir }}/{{ map.limits_conf }}
     - source: salt://elasticsearch/files/limits.conf
+
 
